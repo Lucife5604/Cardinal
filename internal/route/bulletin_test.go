@@ -11,14 +11,14 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/Cardinal-Platform/testify/assert"
 	"github.com/flamego/flamego"
 	jsoniter "github.com/json-iterator/go"
-	"github.com/stretchr/testify/assert"
 
 	"github.com/vidar-team/Cardinal/internal/form"
 )
 
-func TestBulletins(t *testing.T) {
+func TestBulletin(t *testing.T) {
 	router, managerToken, cleanup := NewTestRoute(t)
 
 	for _, tc := range []struct {
@@ -26,9 +26,9 @@ func TestBulletins(t *testing.T) {
 		test func(t *testing.T, router *flamego.Flame, managerToken string)
 	}{
 		{"List", testListBulletins},
-		{"New", testNewBulletins},
-		{"Update", testUpdateBulletins},
-		{"Delete", testDeleteBulletins},
+		{"New", testNewBulletin},
+		{"Update", testUpdateBulletin},
+		{"Delete", testDeleteBulletin},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Cleanup(func() {
@@ -70,18 +70,14 @@ func testListBulletins(t *testing.T, router *flamego.Flame, managerToken string)
 	want = `{
     "data": [
         {
-            "UpdatedAt": "2020-01-09T10:06:40Z",
             "DeletedAt": null,
             "Title": "Welcome",
             "Body": "Welcome to D^3CTF!",
-            "ID": 1,
-            "CreatedAt": "2020-01-09T10:06:40Z"
+            "ID": 1
         },
         {
             "Body": "/web.zip",
             "ID": 2,
-            "CreatedAt": "2020-01-09T10:06:40Z",
-            "UpdatedAt": "2020-01-09T10:06:40Z",
             "DeletedAt": null,
             "Title": "Hint for Web1"
         }
@@ -89,10 +85,10 @@ func testListBulletins(t *testing.T, router *flamego.Flame, managerToken string)
     "error": 0
 }
 `
-	assert.JSONEq(t, want, w.Body.String())
+	assert.JSONPartialEq(t, want, w.Body.String())
 }
 
-func testNewBulletins(t *testing.T, router *flamego.Flame, managerToken string) {
+func testNewBulletin(t *testing.T, router *flamego.Flame, managerToken string) {
 	// Invalid JSON.
 	req, err := http.NewRequest(http.MethodPost, "/api/manager/bulletin", strings.NewReader(`{"Title": "No body"`))
 	assert.Nil(t, err)
@@ -123,7 +119,7 @@ func testNewBulletins(t *testing.T, router *flamego.Flame, managerToken string) 
 	assert.JSONEq(t, `{"error": 0, "data": ""}`, w.Body.String())
 }
 
-func testUpdateBulletins(t *testing.T, router *flamego.Flame, managerToken string) {
+func testUpdateBulletin(t *testing.T, router *flamego.Flame, managerToken string) {
 	// Create two bulletins.
 	createBulletin(t, managerToken, router, "Welcome", "Welcome to D^3CTF!")
 	createBulletin(t, managerToken, router, "Hint for Web1", "/web.zip")
@@ -169,18 +165,14 @@ func testUpdateBulletins(t *testing.T, router *flamego.Flame, managerToken strin
 	want := `{
     "data": [
         {
-            "UpdatedAt": "2020-01-09T10:06:40Z",
             "DeletedAt": null,
             "Title": "Welcome!!",
             "Body": "Welcome to HCTF!",
-            "ID": 1,
-            "CreatedAt": "2020-01-09T10:06:40Z"
+            "ID": 1
         },
         {
             "Body": "/web.zip",
             "ID": 2,
-            "CreatedAt": "2020-01-09T10:06:40Z",
-            "UpdatedAt": "2020-01-09T10:06:40Z",
             "DeletedAt": null,
             "Title": "Hint for Web1"
         }
@@ -188,10 +180,10 @@ func testUpdateBulletins(t *testing.T, router *flamego.Flame, managerToken strin
     "error": 0
 }
 `
-	assert.JSONEq(t, want, w.Body.String())
+	assert.JSONPartialEq(t, want, w.Body.String())
 }
 
-func testDeleteBulletins(t *testing.T, router *flamego.Flame, managerToken string) {
+func testDeleteBulletin(t *testing.T, router *flamego.Flame, managerToken string) {
 	// Create two bulletins.
 	createBulletin(t, managerToken, router, "Welcome", "Welcome to D^3CTF!")
 	createBulletin(t, managerToken, router, "Hint for Web1", "/web.zip")
@@ -229,8 +221,6 @@ func testDeleteBulletins(t *testing.T, router *flamego.Flame, managerToken strin
         {
             "Body": "/web.zip",
             "ID": 2,
-            "CreatedAt": "2020-01-09T10:06:40Z",
-            "UpdatedAt": "2020-01-09T10:06:40Z",
             "DeletedAt": null,
             "Title": "Hint for Web1"
         }
@@ -238,7 +228,7 @@ func testDeleteBulletins(t *testing.T, router *flamego.Flame, managerToken strin
     "error": 0
 }
 `
-	assert.JSONEq(t, want, w.Body.String())
+	assert.JSONPartialEq(t, want, w.Body.String())
 }
 
 func createBulletin(t *testing.T, managerToken string, router *flamego.Flame, title, body string) {
